@@ -17,6 +17,7 @@ public class Piece {
     private boolean isGrabbed;
     private float scale = 0.17f;
     private Board.BoardUnit currentBoardUnit;
+    private boolean firstMove = true;
 
     public Image getImage() {
         return image;
@@ -32,6 +33,7 @@ public class Piece {
     public Type getType() {
         return type;
     }
+    public boolean isFirstMove() {return firstMove;}
 
     public int getRaceSign(){
         switch (race){
@@ -210,6 +212,9 @@ public class Piece {
             oldBoardUnit.currentPiece = null;
             newBoardUnit.currentPiece = this;
             currentBoardUnit = newBoardUnit;
+            if (firstMove) {
+                firstMove = false;
+            }
             if (enemyPiece) {
                 Main.getBoard().removePiece(enemy);
                 //Main.AnimateCapture(enemy.getImage(),enemy.getPositionCentre(), 0.17f);

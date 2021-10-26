@@ -1,5 +1,6 @@
 package com.DavChess;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MoveGenerator {
@@ -13,7 +14,11 @@ public class MoveGenerator {
     public List<Board.BoardUnit> GenerateMove(Piece p, Board b){
         switch (p.getType()){
             case Pawn:
-                List<Board.BoardUnit> list = List.of(b.getBoardUnit(p.getBoardPosition().add(new Vector2Int(0,1*-p.getRaceSign()))));
+                List<Board.BoardUnit> list = new ArrayList<>();
+                if (p.isFirstMove()){
+                    list.add(b.getBoardUnit(p.getBoardPosition().add(new Vector2Int(0,2*-p.getRaceSign()))));
+                }
+                list.add(b.getBoardUnit(p.getBoardPosition().add(new Vector2Int(0,1*-p.getRaceSign()))));
                 return list;
         }
         return null;
