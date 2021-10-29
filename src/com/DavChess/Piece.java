@@ -1,9 +1,11 @@
 package com.DavChess;
 
+import com.DavChess.Exceptions.OutOfBoundsException;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -64,7 +66,11 @@ public class Piece {
     }
 
     public void Update(){
-        SetPosition();
+        try {
+            SetPosition();
+        }catch (OutOfBoundsException e){
+            e.printStackTrace();
+        }
         CheckForGrabbed();
     }
 
@@ -80,7 +86,7 @@ public class Piece {
         }
     }
 
-    private void SetPosition(){
+    private void SetPosition() throws OutOfBoundsException {
         Vector2Int wpos = Main.getBoard().getBoardUnit(boardPosition).worldPosition;
         float centreOffsetX = (image.getWidth() / 2) * scale;
         float centreOffsetY = (image.getHeight() / 2) * scale;
@@ -91,8 +97,12 @@ public class Piece {
         }
     }
 
-    private List<Board.BoardUnit> GetValidMoves(){
-        return Main.moveGenerator.GenerateMove(this,Main.getBoard());
+    private List<MoveGenerator.Move> GetValidMoves(){
+        try {
+            return Main.moveGenerator.GenerateMove(this,Main.getBoard());
+        }catch (OutOfBoundsException e){
+            return new ArrayList<>();
+        }
     }
 
 
@@ -100,9 +110,9 @@ public class Piece {
         if (GetValidMoves() == null) {
             return;
         }
-        for (Board.BoardUnit b:
+        for (MoveGenerator.Move m:
                 GetValidMoves()) {
-            b.setHighlighted(true);
+            m.boardUnit.highlightType = m.moveType;
         }
     }
 
@@ -110,9 +120,9 @@ public class Piece {
         if (GetValidMoves() == null) {
             return;
         }
-        for (Board.BoardUnit b:
+        for (MoveGenerator.Move m:
                 GetValidMoves()) {
-            b.setHighlighted(false);
+            m.boardUnit.highlightType = MoveGenerator.Move.MoveType.none;
         }
     }
 
@@ -127,7 +137,11 @@ public class Piece {
         if (isGrabbed && Main.input.isMousePressed(Main.input.MOUSE_LEFT_BUTTON)) {
             UnGrab();
             Board.BoardUnit closestBoardUnit = returnClosest();
-            MovePiece(closestBoardUnit.boardPosition);
+            try {
+                MovePiece(closestBoardUnit.boardPosition);
+            }catch (OutOfBoundsException e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -179,24 +193,26 @@ public class Piece {
      * Initialises piece position at start
      * @param position
      */
-    public void InitPiece(Vector2Int position){
+    public void InitPiece(Vector2Int position) throws OutOfBoundsException {
             this.boardPosition = position;
             currentBoardUnit = Main.getBoard().getBoardUnit(position);
     }
 
     private boolean IsValidMove(Board.BoardUnit newBoardUnit){
-        if (GetValidMoves().contains(newBoardUnit)){
-            return true;
-        }else{
-            return false;
+        for (MoveGenerator.Move m :
+                GetValidMoves()) {
+            if (m.boardUnit == newBoardUnit) {
+                return true;
+            }
         }
+            return false;
     }
 
     /**
      * Move the piece to a new position
      * @param newPosition
      */
-    public void MovePiece(Vector2Int newPosition){
+    public void MovePiece(Vector2Int newPosition) throws OutOfBoundsException {
         Board.BoardUnit newBoardUnit = Main.getBoard().getBoardUnit(newPosition);
         Board.BoardUnit oldBoardUnit = currentBoardUnit;
         boolean spaceEmpty = Main.getBoard().getBoardUnit(newPosition).currentPiece==null;

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.DavChess.Exceptions.OutOfBoundsException;
 import org.newdawn.slick.*;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -25,7 +26,7 @@ public class Main extends BasicGame
     private static Color blackColor = new Color(92,50,48);
     private static Board board;
     private String configuration =
-            "a1Rw-b1Nw-c1Bw-d1Qw-e1Kw-f1Bw-g1Nw-h1Rw-a2Pw-b2Pw-c2Pw-d2Pw-e2Pw-f2Pw-g2Pw-h2Pw-"+
+            "a1Rw-b1Nw-c1Bw-d1Qw-e1Kw-f1Bw-g1Nw-h1Rw-a2Pw-b2Pw-c2Pw-d2Pw-e2Qw-f2Pw-g2Pw-h2Pw-"+
             "a8Rb-b8Nb-c8Bb-d8Qb-e8Kb-f8Bb-g8Nb-h8Rb-a7Pb-b7Pb-c7Pb-d7Pb-e7Pb-f7Pb-g7Pb-h7Pb-";
 
     public static Board getBoard() {
@@ -56,7 +57,11 @@ public class Main extends BasicGame
     @Override
     public void render(GameContainer gc, Graphics g) throws SlickException
     {
-        RenderBoard(g);
+        try {
+            RenderBoard(g);
+        } catch (OutOfBoundsException e) {
+            e.printStackTrace();
+        }
         DrawPieces();
         g.drawString(mousePos.toString(),000,400);
         g.setColor(Color.black);
@@ -79,7 +84,7 @@ public class Main extends BasicGame
      * Renders the gridded chess board on game initialisation
      * @param g
      */
-    public void RenderBoard(Graphics g){
+    public void RenderBoard(Graphics g) throws OutOfBoundsException {
         int h = Math.round(height*boardScale);
         boolean black = false;  
         int middleOfScreen = width/2;
@@ -95,11 +100,19 @@ public class Main extends BasicGame
                 }
                 black = !black;
                 //render different color if board tile is highlighted
-                if (board.getBoardUnit(new Vector2Int(x-1,y-1)).isHighlighted()) {
-                    g.setColor(Color.lightGray);
-                }
-                g.drawRect((x * h/8)+boardOffsetX,(y * h/8),h/8,h/8);
+                //g.drawRect((x * h/8)+boardOffsetX,(y * h/8),h/8,h/8);
                 g.fillRect((x * h/8)+boardOffsetX,(y * h/8),h/8,h/8);
+
+                if (board.getBoardUnit(new Vector2Int(x-1,y-1)).highlightType == MoveGenerator.Move.MoveType.move) {
+                    g.setColor(Color.lightGray);
+                    int size = 30;
+                    g.fillOval(((x) * h/8)+(h/16)+boardOffsetX-size/2,((y) * h/8)+(h/16)-size/2,size,size);
+                }
+                if (board.getBoardUnit(new Vector2Int(x-1,y-1)).highlightType == MoveGenerator.Move.MoveType.capture) {
+                    g.setColor(Color.lightGray);
+                    g.fillRect((x * h/8)+boardOffsetX,(y * h/8),h/8,h/8);
+                }
+
                 board.InitBoardUnit(new Vector2Int(x-1,y-1),new Vector2Int(((x) * h/8)+(h/16)+boardOffsetX,((y) * h/8)+(h/16)));
 
             }

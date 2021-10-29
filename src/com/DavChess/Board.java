@@ -1,5 +1,7 @@
 package com.DavChess;
 
+import com.DavChess.Exceptions.OutOfBoundsException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,14 +25,11 @@ public class Board {
         Piece currentPiece = null;
         Vector2Int worldPosition;
         Vector2Int boardPosition;
-        boolean highlighted;
+        public MoveGenerator.Move.MoveType highlightType;
 
         public Vector2Int getWorldPosition() {
             return worldPosition;
         }
-        public boolean isHighlighted() {return highlighted;}
-
-        public void setHighlighted(boolean b) {highlighted = b;}
     }
 
     public Board() {
@@ -59,7 +58,7 @@ public class Board {
      * @param pos Relative position of board unit in chess space
      * @return Board Unit
      */
-    public BoardUnit getBoardUnit(Vector2Int pos){
+    public BoardUnit getBoardUnit(Vector2Int pos) throws OutOfBoundsException {
         return worldGrid[pos.x][pos.y];
     }
 
@@ -89,7 +88,7 @@ public class Board {
      * @param chessCoord Coordinate of the piece using chess coords
      * @param piece The piece to place
      */
-    public void AddPiece(String chessCoord, Piece piece){
+    public void AddPiece(String chessCoord, Piece piece) throws OutOfBoundsException {
         Vector2Int p = Board.ChessCoordToWorld(chessCoord);
         worldGrid[p.x][p.y].currentPiece = piece;
         piece.InitPiece(p);
@@ -154,5 +153,12 @@ public class Board {
             default:
                 return null;
         }
+    }
+
+    public boolean outofBounds(Vector2Int pos){
+        if (pos.x >= 8 || pos.x < 0 || pos.y >= 8 || pos.y < 0) {
+            return true;
+        }
+        return false;
     }
 }
